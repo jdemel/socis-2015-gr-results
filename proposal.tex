@@ -1,7 +1,6 @@
 \documentclass[a4paper,12pt]{scrartcl}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{amsmath}
 
@@ -13,6 +12,15 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+\usepackage[draft]{hyperref}
+% \usepackage{nohyperref}  % This makes hyperref commands do nothing without errors
+% \usepackage{url}  % This makes \url work
+
+\usepackage[printonlyused]{acronym}
+
+% taken from stackoverflow for pretty C++ formatting.
+\def\CC{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\textbf{++}}}}
+
 \tikzstyle{block} = [rectangle, draw, %fill=blue!20, 
     text width=2em, text centered, %rounded corners, 
     minimum height=2em]
@@ -21,9 +29,14 @@
 
 \tikzstyle{sum} = [draw, circle, minimum size=.3em, execute at begin node={\begin{varwidth}{15em}}, execute at end node={\end{varwidth}}]
 
+\acused{ESA}
+\acused{NASA}
+\acused{CPU}
+\acused{LTE}
+
 %opening
 \title{Project proposal for\\
-ESA Summer of Code in Space 2015\\
+\ac{ESA} Summer of Code in Space 2015\\
 A VOLK-ified POLAR code implementation in GNU Radio
 }
 \author{Johannes Demel\\\href{mailto:johannes.demel@student.kit.edu}{johannes.demel@student.kit.edu}}
@@ -38,35 +51,36 @@ A VOLK-ified POLAR code implementation in GNU Radio
 \section{Introduction}
 Claude Shannon and Warren Weaver originally published ``The mathematical theory of communication'' \cite{shannon1998} in 1949.
 In this book they develop a theoretical concept for channel coding.
-NASA's Voyager 2 mission used convolutional and Reed-Solomon codes.
+\ac{NASA}'s Voyager 2 mission used convolutional and Reed-Solomon codes.
 Later Turbo codes were introduced in order to get closer to the Shannon limit.
-Lately LDPC codes became popular as a coding standard for communication links.
-However up until recently no channel codes were known that are symptotically good in a sense stated by Shannon\footnote{Claude was caught exceeding the Shannon-Limit.}.
+Lately \ac{LDPC} codes became popular as a coding standard for communication links.
+However up until recently no channel codes were known that are asymptotically good in a sense stated by Shannon\footnote{Claude was caught exceeding the Shannon-Limit.}.
 In 2009 Erdal Arikan first proposed a new method of constructing codes that reach channel capacity for binary symmetric memoryless channels, \cite{polar:arikan09}.
 These codes are named POLAR codes after the polarization effect they exploit.
 
 GNU Radio includes a framework for channel codes called gr-fec.
 It provides skeletons for encoders and decoders which provide a common interface for all sorts of codes.
 Currently only convolutional and Reed-Solomon codes are available in-tree in GNU Radio.
-Other coding families such as Turbo codes or LDPC codes are available.
+Other coding families such as Turbo codes or \ac{LDPC} codes are available.
 
-As a part of GNU Radio's performance enhancements VOLK provides fast SIMD kernels.
-Although latest development moves VOLK into its own subproject, it is still an integral part of GNU Radio.
-Besides a large list of basic functionality also more sophisticated algorithms such as a convolutional codes are implemented.
-Users profit form VOLK in multiple ways.
-They can use faster standard GNU Radio blocks and they can call VOLK kernels directly to speed up their own blocks.
+GNU Radio's \acs{VOLK} subproject provides performance enhancements with fast \ac{SIMD} kernels.
+It provides a library of basic \ac{SIMD} accelerated functions.
+Also sophisticated kernels exist which boost specific algorithms such as convolutional codes.
+Users profit from \ac{VOLK} in multiple ways.
+They can use faster standard GNU Radio blocks.
+\ac{VOLK} kernels can be directly integrated into custom blocks in order to speed them up.
 
 The objective of my project is to add POLAR codes to GNU Radio.
 This includes an optimized encoder and decoder as well as suitable algorithms for channel construction.
 GNU Radio's gr-fec API will be used to implement an encoder and decoder. 
-A Python implementation will serve as a first reference ahead of the optimized high performance C++ implementation.
+A Python implementation will serve as a first reference ahead of the optimized high performance \CC{} implementation.
 This will also provide improved unit tests and thus help for better code quality.
 
 
 \section{POLAR codes}
 POLAR codes consist of three parts, an encoder, a decoder and the so-called channel construction.
 In this section I will present the basics of all three aspects.
-In order to use POLAR codes a user chooses a symmetric binary discrete memoryless channel (DMC) $W$, an error probalility $p$, a block size $N$, where $N$ is a power of $2$, and a code rate $R$.
+In order to use POLAR codes a user chooses a \ac{BDMC} $W$, an error probalility $p$, a block size $N$, where $N$ is a power of $2$, and a code rate $R$.
 Code rate $R$ is given as $R = \frac{K}{N}$ with $K$ being the number of \textit{information bits}.
 The result of channel construction is a vector with the Bhattacharyya parameters, also called Z parameters, or channel capacities respectively.
 Then the $K$ channels out of $N$ with smallest Z parameters are chosen to carry \textit{information bits}.
@@ -74,12 +88,12 @@ All other channels carry \textit{frozen bits} with known values and positions wi
 The created POLAR code is then fed to the encoder and decoder for use in a communication system.
 
 This section is written with respect to \cite{polar:arikan09}.
-First consider a binary symmetric memoryless channel $W: \mathcal{X} \rightarrow \mathcal{Y}$.
+First consider a \ac{BDMC} $W: \mathcal{X} \rightarrow \mathcal{Y}$.
 Its input alphabet shall always be $\mathcal{X} = \{0, 1\}$.
 Though its output alphabet depends on the considered channel and is left arbitrary.
-In Fig. \ref{fig:channel_examples} a generalized channel example and a BSC and a BEC are shown.
-In case of BSC an error probalility $p_e$ is given which denotes the probalility that a received symbol is unlike the transmitted symbol.
-A BEC does not receive erroneous symbols but either receives the correct one or a none-symbol indicating an error.
+In Fig. \ref{fig:channel_examples} a generalized channel example and a \ac{BSC} and a \ac{BEC} are shown.
+In case of \ac{BSC} an error probalility $p_e$ is given which denotes the probalility that a received symbol is unlike the transmitted symbol.
+A \ac{BEC} does not receive erroneous symbols but either receives the correct one or a none-symbol indicating an error.
 A channel's transition propablities are denoted by $W(x|y)$.
 For further considerations the mutual information
 \begin{equation}
@@ -121,7 +135,7 @@ as a measure of reliability are of importance.
       \path [line, style={sloped,anchor=south,auto=false}] (x0) -- node [near end]{$p_e$}(y1);
       \path [line, style={sloped,anchor=south,auto=false}] (x1) -- node [near end]{$p_e$}(y0);
     \end{tikzpicture}
-    \caption{BSC transition probalilities}
+    \caption{\acs{BSC} transition probalilities}
     \label{fig:bsc}
   \end{subfigure}\quad
   \begin{subfigure}{.3\textwidth}
@@ -144,7 +158,7 @@ as a measure of reliability are of importance.
 	  \path [line, style={sloped,anchor=south,auto=false}] (x0) -- node [near end]{$p_e$}(yX);
 	  \path [line, style={sloped,anchor=south,auto=false}] (x1) -- node [near end]{$p_e$}(yX);
       \end{tikzpicture}
-  \caption{BEC transition probalilities}
+  \caption{\ac{BEC} transition probalilities}
   \label{fig:bec}
  \end{subfigure}%
 
@@ -153,9 +167,9 @@ as a measure of reliability are of importance.
 \end{figure}
 
 \subsection{Encoder}
-Fig. \ref{fig:polar_combined} shows how a $W^2$ POLAR channel is contructed.
-It uses two copies of $W$ and computes $x_0 = u_0 + u_1$ on $GF(2)$ to construct a combined channel.
+The encoder uses two copies of $W$ and computes $x_0 = u_0 + u_1$ on $GF(2)$ to construct a combined channel.
 This copy-and-combine process is repeated until the desired power of two number of channels are created and denoted by $W^N$.
+Fig. \ref{fig:polar_combined} shows how a $W^2$ POLAR channel is contructed.
 Channel combining can be described by 2 matrices.
 \begin{equation}
   F = \begin{bmatrix}
@@ -238,13 +252,13 @@ The arrows in Fig. \ref{fig:polar_split} indicate the influence of $u^N_{i+1}$ a
   \begin{subfigure}{.49\textwidth}
   \centering
    \includegraphics[width=\textwidth]{figure/bec_capacity_0_3_1024.pdf}
-   \caption{BEC $I (W^{(i)}_N )$ for $\eta=0.3$, $N=1024$}
+   \caption{\acs{BEC} $I (W^{(i)}_N )$ for $\eta=0.3$, $N=1024$}
    \label{fig:bec_capacity}
   \end{subfigure}
   \begin{subfigure}{.49\textwidth}
   \centering
    \includegraphics[width=\textwidth]{figure/bsc_capacity_0_1_8.pdf}
-   \caption{BSC $I (W^{(i)}_N )$ for $p=0.1$, $N=8$}
+   \caption{\acs{BSC} $I (W^{(i)}_N )$ for $p=0.1$, $N=8$}
    \label{fig:bsc_capacity}
   \end{subfigure}
   \caption{Channel capacities for different channels}
@@ -257,7 +271,7 @@ Thus they are either perfect channels or noise-only channels.
 A user chooses a desired rate and selects the best channels for \textit{information bits}.
 All other channels will transmit \textit{frozen bits}.
 
-Only BEC channels can be calculated efficiently.
+Only \ac{BEC} channels can be calculated efficiently.
 For other channels optimized algorithms are proposed in \cite{tal2013construct}.
 
 \subsection{Decoder}
@@ -279,10 +293,10 @@ This project will be available under the term of the GNU GPLv3.
 At the end of the project a pull request for GNU Radio will be prepared in order to make POLAR codes available as easily as possible to every potential user.
 
 \paragraph{Python test code} for extensive unit tests shall be created first.
-This will foster my knowledge with POLAR codes and later serve as a reference in the unit test for the C++ implementation.
+This will foster my knowledge with POLAR codes and later serve as a reference in the unit test for the \CC{} implementation.
 
 \paragraph{Encoders and Decoders} are the heart of the signal processing code.
-They will be coded in C++ and seemlessly integrated into the FECAPI.
+They will be coded in \CC{} and seemlessly integrated into the FECAPI.
 The integration of encoders and decoders is depicted in Fig. \ref{fig:polar_mockup}.
 In order to make them as useful as possible they shall be optimized for maximum performance.
 
@@ -292,8 +306,8 @@ In order to make them as useful as possible they shall be optimized for maximum 
  \label{fig:polar_mockup}
 \end{figure}
 
-\paragraph{VOLK kernels} will be created that use a CPU's SIMD instruction set for further performance gains.
-Those kernels will be prepared for merging with the upcoming VOLK project.
+\paragraph{\acs{VOLK} kernels} will be created that use a \ac{CPU}'s \ac{SIMD} instruction set for further performance gains.
+Those kernels will be prepared for merging with the \ac{VOLK} project.
 
 \paragraph{Channel construction} for large codes will be implemented.
 Therefore the proposed algorithms \cite{tal2013construct} will be implemented in Python using NumPy.
@@ -303,58 +317,58 @@ In order to speed up usage, file save and file read will be provided.
 
 \section{Timeline}
 This is a preliminary timeline to give an overview of the upcoming project stages.
-It is synchronized to the ESA Summer of Code in Space timeline.
+It is synchronized to the \ac{ESA} Summer of Code in Space timeline.
 
 \paragraph{April 30} student application deadline.
-\paragraph{May1 - May 31 Community Bonding period} 4 weeks, gathering in-depth knowledge of the upcoming project, reading papers, documentation, meetings with mentor for detailed discussions.
+\paragraph{May 1 - May 31 Community Bonding period} 4 weeks, gathering in-depth knowledge of the upcoming project, reading papers, documentation, meetings with mentor for detailed discussions.
 Choose suitable algorithms for implementation.
 \paragraph{June 1 - June 14 Initial Coding} 2 weeks, implement encoder, decoder and channel calculation for code construction in Python.
-Create test suite for C++ implementation.
+Create test suite for \CC{} implementation.
 \paragraph{June 15 - June 29} 2 weeks, port encoder and decoder to gr-fec in GNU Radio.
 Create blocks that can be dropped into the FECAPI framework and make all tests pass.
 \paragraph{June 30 - July 5} 1 week, optimize encoder and decoder block for maximum throughput
 \paragraph{July 6 - July 7 Mid-term wrap up} 2 days, prepare and submit results for mid-term evaluation.
-\paragraph{July 8 - August 7} 4 weeks, implement VOLK kernels for POLAR encoder and decoder.
+\paragraph{July 8 - August 7} 4 weeks, implement \ac{VOLK} kernels for POLAR encoder and decoder.
 \paragraph{August 8 - August 23} 2 weeks, implement sophisticated channel calculation algorithms to enable use of large vector channels.
 \paragraph{August 24 pencils down} 1 week, issue pull request and work on integration into GNU Radio main.
 \paragraph{August 31 project end} project hopefully merged in main.
 
 
 \section{Motivation}
-I am a Master degree student at Karlsruhe Institute of Technology (KIT), Germany.
-My major is focused on Communication at Communications Engineering Lab (CEL).
-Also I am currently a student research assistant at CEL.
+I am a Master degree student at \ac{KIT}, Germany.
+My major is focused on Communication at \ac{CEL}.
+Also I am currently a student research assistant at \ac{CEL}.
 During my studies and work I acquired advanced skills in digital signal processing, waveform design and software engineering.
 
-I got in touch with GNU Radio back in 2012 when I started my Bachelor thesis on {LTE signal reception with GNU Radio}.
+I got in touch with GNU Radio back in 2012 when I started my Bachelor thesis on {\ac{LTE} signal reception with GNU Radio}.
 The outcome of this thesis is available on Github \cite{repo:gr-lte}.
 After I finished my Bachelor thesis I continued to work on it and added more features as well as code improvements.
 Further outcome of this work are two articles \cite{lte:winncomm2013} and \cite{lte:springer2015}.
 During the course of gr-lte development I touched a great variety of different parts of GNU Radio.
 Firstly adopting and integrating existing blocks into the project.
-Secondly learning a lot about GNU Radio internals like scheduler specifics, class inheritance structures and VOLK usage.
+Secondly learning a lot about GNU Radio internals like scheduler specifics, class inheritance structures and \ac{VOLK} usage.
 Also, I improved my knowledge to write test code in order to improve code quality.
 
-Besides my studies at KIT I did an internship at Ettus Research in 2013/14, fostering my programming skills and deepening my GNU Radio knowledge.
+Besides my studies at \ac{KIT} I did an internship at Ettus Research in 2013/14, fostering my programming skills and deepening my GNU Radio knowledge.
 During that time I contributed to Ettus' UHD driver and developed tools for use with GNU Radio \cite{repo:gr-misc}.
 
-Currently I'm working as a student research assistant at CEL again.
-My fields of interest are SDR development and system optimization.
+Currently I'm working as a student research assistant at \ac{CEL} again.
+My fields of interest are \ac{SDR} development and system optimization.
 This includes heavy algorithmic optimization and overall code optimization for maximum throughput and bandwidth capabilities.
 Recently I contributed to GNU Radio by adding a rename capability to its modtool tool \cite{repo:gr-rename-contribution}.
 
-Besides my experience with GNU Radio and thus with C++ and Python, I also did several smaller projects.
+Besides my experience with GNU Radio and thus with \CC{} and Python, I also did several smaller projects.
 That includes closed source projects at university level with Java and Java for Android.
 I did microcontroller programming in ANSI C and Assembler.
 This included integration of an IP microcontroller into an existing VHDL project.
 
-Before ESA Summer of Code in Space starts I will have finished my last exams and be fully available for my project.
+Before \ac{ESA} Summer of Code in Space starts I will have finished my last exams and be fully available for my project.
 I want to take the opportunity to work on GNU Radio while I am still a student.
 Also, I aim at using the results of my project as part of my Master thesis.
 I hope to foster my knowledge and experience with software engineering and channel coding.
 
-During the course of the project, I will have access to CEL's labs and equipment.
-And Sebastian Koslowski, who is currently with CEL, agreed on mentoring my project.
+During the course of the project, I will have access to \ac{CEL}'s labs and equipment.
+And Sebastian Koslowski, who is currently with \ac{CEL}, agreed on mentoring my project.
 Thus I will always be able to talk to him personally about project progress and pitfalls.
 
 I read GNU Radio's Code of Conduct and understood and agree to it, including the three strikes rule.
@@ -385,7 +399,9 @@ I would like to take this opportunity to participate in GNU Radio development an
 %  \bibliographystyle{geralpha}
 %  \bibliographystyle{alpha}
 %  \bibliographystyle{unsrt}
-  \bibliographystyle{IEEEtran}
+\bibliographystyle{IEEEtran}
 
+% For use with acronym package
+\include{acronym_list}
 
 \end{document}
