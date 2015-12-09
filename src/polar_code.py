@@ -468,8 +468,8 @@ def main():
     eta = 0.3
     nc = 1024
     probs = calculate_bec_channel_capacities(eta, nc)
-    plot_channel(probs, eta, 'bec_capacity')
-    plot_channel(c, p, 'bsc_capacity')
+    # plot_channel(probs, eta, 'bec_capacity')
+    # plot_channel(c, p, 'bsc_capacity')
 
 
 

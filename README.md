@@ -1,4 +1,4 @@
-# socis-proposal
-This repository holds my application files for ESA SOCIS.
+# SOCIS 2015
+This repository provides information about the ESA SOCIS 2015 project for GNU Radio and beyond.
 
-It contains the actual proposal PDF, all the files necessary to create them and some code samples in the src/ folder. Those code samples were used to generate the graphs in the proposal.
+It contains the presentation held at GRCon2015 as well as the master thesis based on this project.
